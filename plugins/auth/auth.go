@@ -5,14 +5,14 @@ import (
 	"github.com/qypt15/fmq/plugins/auth/authhttp"
 )
 
-const {
+const (
 	AuthHTTP = "authhttp"
 	AuthFile = "authfile"
-}
+)
 
 type Auth interface {
-	CheckACL(action,clienID,username,ip,topic string) bool
-	CheckConnenct(clientID, username, password sting) bool
+	CheckACL(action,clientID,username,ip,topic string) bool
+	CheckConnect(clientID, username, password string) bool
 }
 
 func NewAuth(name string) Auth {

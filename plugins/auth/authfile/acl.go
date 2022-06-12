@@ -13,3 +13,11 @@ func Init() *aclAuth {
 		config: aclConfig,
 	}
 }
+
+func (a *aclAuth) CheckConnect(clientID, username, password string) bool {
+	return true
+}
+
+func (a *aclAuth) CheckACL(action, clientID, username, ip, topic string) bool {
+	return checkTopicAuth(a.config, action, ip, username, clientID, topic)
+}

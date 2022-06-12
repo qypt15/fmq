@@ -11,8 +11,8 @@ import (
 	"io/ioutil"
 	"os"
 	"github.com/qypt15/fmq/logger"
-	"github.com/qypt15/fmq/pulgins/auth"
-	"github.com/qypt15/fmq/pulgins/bridge"
+	"github.com/qypt15/fmq/plugins/auth"
+	"github.com/qypt15/fmq/plugins/bridge"
 )
 
 type Config struct {
@@ -38,13 +38,13 @@ type Plugins struct {
 }
 
 type NamedPlugins struct {
-	Auth sting
+	Auth string
 	Bridge string
 }
 
 type RouteInfo struct {
 	Host string `json:"host"`
-	Port sting `json:"port"`
+	Port string `json:"port"`
 }
 
 type TLSInfo struct {
