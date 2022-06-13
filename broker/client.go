@@ -2,9 +2,12 @@ package broker
 
 import (
 	"context"
+	"github.com/eapache/queue"
+	"github.com/eclipse/paho.mqtt.golang/packets"
 	"net"
 	"regexp"
 	"sync"
+	"time"
 )
 
 const (
@@ -42,6 +45,21 @@ type client struct {
 	status 		int
 	ctx 		context.Context
 	cancelFunc 	context.CancelFunc
-
+	session 	*sessions.Session
+	subMap 		map[string]*subscription
+	subMapMu 	sync.RWMutex
+	topicsMgr	*topics.Manager
+	subs 		[]interface{}
+	qoss 		[]buye
+	rmsgs		[]*packets.PublishPacket
+	routeSubMap map[string]uint64
+	routeSubMapMu	sync.Mutex
+	awaitingRel   map[uint16]int64
+	maxAwaitingRel int
+	inflight 		map[uint16]*inflightElem
+	inflightMu 		sync.RWMutex
+	mqueue 			*queue.Queue
+	retryTimer 		*time.Timer
+	retryTimerLock  sync.Mutex
 
 }
