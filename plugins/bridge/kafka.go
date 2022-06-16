@@ -6,6 +6,9 @@ import (
 	"io/ioutil"
 	"strings"
 	"time"
+
+	"github.com/Shopify/sarama"
+	"go.uber.org/zap"
 )
 
 type kafkaConfig struct {
@@ -40,7 +43,6 @@ func InitKafka() *kafka {
 	c.connect()
 	return c
 }
-
 
 //connect
 func (k *kafka) connect() {

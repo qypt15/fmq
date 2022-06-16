@@ -1,6 +1,9 @@
 package broker
 
-import "github.com/qypt15/fmq/bridge"
+import (
+	"github.com/qypt15/fmq/plugins/bridge"
+	"go.uber.org/zap"
+)
 
 func (b *Broker) Publish(e *bridge.Elements) bool {
 	if b.bridgeMQ != nil {

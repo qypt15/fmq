@@ -2,9 +2,12 @@ package broker
 
 import (
 	"crypto/tls"
-	"github.com/qypt15/fmq/bridge"
-	"github.com/qypt15/fmq/plugins/auth"
 	"github.com/eclipse/paho.mqtt.golang/packets"
+	"github.com/qypt15/fmq/broker/lib/sessions"
+	"github.com/qypt15/fmq/broker/lib/topics"
+	"github.com/qypt15/fmq/plugins/auth"
+	"github.com/qypt15/fmq/plugins/bridge"
+	"github.com/qypt15/fmq/pool"
 	"sync"
 )
 
@@ -22,15 +25,16 @@ type Broker struct {
 	id 		string
 	mu 		sync.Mutex
 	config  *Config
-	tlsConfig *tls.Config
-	wpool    *pool.WorkerPool
-	clients  sync.Map
-	routes  sync.Map
-	remotes   sync.Map
-	nodes 		map[string]interface{}
-	clusterPool 	chan  *Message
-	topicsMgr 	*topics.Manager
+	tlsConfig   *tls.Config
+	wpool       *pool.WorkerPool
+	clients     sync.Map
+	routes      sync.Map
+	remotes     sync.Map
+	nodes       map[string]interface{}
+	clusterPool chan  *Message
+	topicsMgr   *topics.Manager
 	sessionMgr  *sessions.Manager
-	auth 	auth.Auth
-	bridgeMQ 	bridge.BridgeMQ
+	auth        auth.Auth
+	bridgeMQ    bridge.BridgeMQ
 }
+

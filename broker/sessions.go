@@ -11,7 +11,7 @@ func (b *Broker) getSession(cli *client, req *packets.ConnectPacket, resp *packe
 	}
 	cid := req.ClientIdentifier
 
-	// If CleanSession is NOT set, check the session store for existing session.
+	// If CleanSession is NOT set, check the sessions store for existing sessions.
 	// If found, return it.
 	if !req.CleanSession {
 		if cli.session, err = b.sessionMgr.Get(cid); err == nil {
@@ -23,7 +23,7 @@ func (b *Broker) getSession(cli *client, req *packets.ConnectPacket, resp *packe
 		}
 	}
 
-	// If CleanSession, or no existing session found, then create a new one
+	// If CleanSession, or no existing sessions found, then create a new one
 	if cli.session == nil {
 		if cli.session, err = b.sessionMgr.New(cid); err != nil {
 			return err

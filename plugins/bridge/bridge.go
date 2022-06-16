@@ -2,6 +2,8 @@ package bridge
 
 import "github.com/qypt15/fmq/logger"
 
+
+
 const (
 	//Connect mqtt connect
 	Connect = "connect"
@@ -18,6 +20,7 @@ const (
 var (
 	log = logger.Get().Named("bridge")
 )
+
 //Elements kafka publish elements
 type Elements struct {
 	ClientID  string `json:"clientid"`
@@ -42,6 +45,7 @@ type BridgeMQ interface {
 
 
 func NewBridgeMQ(name string) BridgeMQ {
+
 	switch name {
 	case Kafka:
 		return InitKafka()

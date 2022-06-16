@@ -13,6 +13,7 @@ import (
 	"github.com/qypt15/fmq/logger"
 	"github.com/qypt15/fmq/plugins/auth"
 	"github.com/qypt15/fmq/plugins/bridge"
+
 )
 
 type Config struct {
@@ -32,9 +33,10 @@ type Config struct {
 	Plugin   Plugins   `json:"plugins"`
 }
 
+
 type Plugins struct {
-	Auth 	auth.Auth
-	Bridge  bridge.bridgeMQ
+	Auth   auth.Auth
+	Bridge bridge.BridgeMQ
 }
 
 type NamedPlugins struct {
@@ -54,7 +56,7 @@ type TLSInfo struct {
 	KeyFile  string `json:"keyFile"`
 }
 
-var DefaultConfig *Config = &config{
+var DefaultConfig *Config = &Config{
 	Worker: 4096,
 	Host: 	"0.0.0.0",
 	Port:	"1883",
@@ -70,13 +72,14 @@ func showHelp() {
 	os.Exit(0)
 }
 
+
 func ConfigureConfig(args []string) (*Config,error) {
 	config := &Config{}
 	var (
 		help		bool
 		configFile 	string
 	)
-	fs := flag.NewFlagset("hmq-broker",flag.ExitOnError)
+	fs := flag.NewFlagSet("hmq-broker",flag.ExitOnError)
 	fs.Usage = showHelp
 
 	fs.BoolVar(&help, "h", false, "Show this message.")
@@ -101,7 +104,7 @@ func ConfigureConfig(args []string) (*Config,error) {
 	fs.BoolVar(&config.Debug, "debug", false, "enable Debug logging.")
 	fs.BoolVar(&config.Debug, "d", false, "enable Debug logging.")
 
-	fs.bool("D",true,"enable Debug loging.")
+	fs.Bool("D",true,"enable Debug loging.")
 
 	if err := fs.Parse(args); err != nil {
 		return nil,err
@@ -165,7 +168,7 @@ func (p *Plugins) UnmarshalJSON(b []byte) error {
 
 func (config *Config) check() error {
 	if config.Worker == 0 {
-		config.worker = 1024
+		config.Worker = 1024
 	}
 	if config.Port != "" {
 		if config.Host == "" {

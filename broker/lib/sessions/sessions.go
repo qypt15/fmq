@@ -1,4 +1,4 @@
-package session
+package sessions
 
 import (
 	"crypto/rand"
@@ -23,7 +23,6 @@ type SessionsProvider interface {
 	Count() int
 	Close() error
 }
-
 
 // Register makes a session provider available by the provided name.
 // If a Register is called twice with the same name or if the driver is nil,

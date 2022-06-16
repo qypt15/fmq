@@ -3,6 +3,7 @@ package authhttp
 import (
 	"encoding/json"
 	"github.com/qypt15/fmq/logger"
+	"go.uber.org/zap"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -10,10 +11,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
 )
 
 type Config struct {
-	AuthUrl string `json:"auth"`
+	AuthURL string `json:"auth"`
 	ACLURL string  `json:"acl"`
 	SuperURL string `json:"super"`
 }

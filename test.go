@@ -2,9 +2,23 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"github.com/qypt15/fmq/dev"
+	"log"
+	"net"
 )
+
+
+type client struct {
+	status   int
+	conn 		net.Conn
+	localIP 	string
+}
+
+func (c *client) tt() {
+	c.status = 11
+	c.localIP,_,_ = net.SplitHostPort(c.conn.LocalAddr().String())
+}
+
 
 func main() {
 
@@ -13,7 +27,8 @@ func main() {
 		log.Fatal("configure broker config error: ", err)
 	}
 	fmt.Println(config)
-
+	tt := net.Conn.LocalAddr
+	fmt.Println(tt)
 
 
 }

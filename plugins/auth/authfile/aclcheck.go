@@ -2,7 +2,7 @@ package acl
 
 import "strings"
 
-func checkTopicAuth(ACLInfo *ACLConfig, action, ip ,username, clientid, topic stirng) bool {
+func checkTopicAuth(ACLInfo *ACLConfig, action, ip ,username, clientid, topic string) bool {
 	for _, info := range ACLInfo.Info {
 		ctyp := info.Typ
 		switch ctyp {

@@ -4,6 +4,9 @@ import (
 	"context"
 	"github.com/eapache/queue"
 	"github.com/eclipse/paho.mqtt.golang/packets"
+	"github.com/qypt15/fmq/broker/lib/sessions"
+	"github.com/qypt15/fmq/broker/lib/topics"
+	"math/rand"
 	"net"
 	"regexp"
 	"sync"
@@ -63,3 +66,51 @@ type client struct {
 	retryTimerLock  sync.Mutex
 
 }
+
+type InflightStatus uint8
+
+const (
+	Publish InflightStatus = 0
+	Pubrel InflightStatus = 1
+)
+
+type inflightElem struct {
+	status InflightStatus
+	packet  *packets.PublishPacket
+	timestamp int64
+}
+
+type subscription struct {
+	client		*client
+	topic 		string
+	qos 		byte
+	share 		bool
+	groupName 	string
+}
+
+type info struct {
+	clientID 	string
+	username 	string
+	password 	[]byte
+	keepalive uint16
+	willMsg 	*packets.PublishPacket
+	localIP 	string
+	remoteIP 	string
+
+}
+
+type route struct {
+	remoteID string
+	remoteUrl  string
+}
+
+var (
+	DisconnectedPacket = packets.NewControlPacket(packets.Disconnect).(*packets.DisconnectPacket)
+	r					= rand.New(rand.NewSource(time.Now().UnixNano()))
+)
+
+func (c *client) init() {
+	c.status = Connected
+	c.info.localIP,_,_ = net.SplitHostPort(c.conn.LocalAddr().String())
+}
+
