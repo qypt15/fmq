@@ -38,3 +38,16 @@ type Broker struct {
 	bridgeMQ    bridge.BridgeMQ
 }
 
+
+func (b *Broker) SubmitWork(clientId string,msg *Message) {
+	if b.wpool == nil {
+		b.wpool = pool.New(b.config.Worker)
+	}
+	if msg.client.typ == CLUSTER {
+		b.clusterPool <- msg
+	} else {
+		b.wpool.Submit(clientId,func(){
+			ProcessMessage(msg)
+		})
+	}
+}
