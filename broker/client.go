@@ -292,3 +292,7 @@ func (c *client) ProcessPublish(packet *packets.PublishPacket) {
 	}
 
 }
+
+func (c *client) processClientPublish(packet *packets.PublishPacket) {
+	topics := packet.TopicName
+}
