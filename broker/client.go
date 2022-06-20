@@ -8,34 +8,35 @@ import (
 	"github.com/qypt15/fmq/broker/lib/sessions"
 	"github.com/qypt15/fmq/broker/lib/topics"
 	"go.uber.org/zap"
+	"golang.org/x/net/websocket"
 	"math/rand"
 	"net"
 	"regexp"
 	"sync"
 	"time"
-	"golang.org/x/net/websocket"
 	"unicode/utf8"
+	"reflect"
 )
 
 const (
-	BrokerInfoTopic  = "broker000100101info"
-	CLIENT				= 0
-	ROUTER  			= 1
-	REMOTE   			= 2
-	CLUSTER				= 3
+	BrokerInfoTopic = "broker000100101info"
+	CLIENT          = 0
+	ROUTER          = 1
+	REMOTE          = 2
+	CLUSTER         = 3
 )
 
 const (
 	_GroupTopicRegexp = `^\$share/([0-9a-zA-Z_-]+)/(.*)$`
 )
 const (
-	Connected = 1
+	Connected    = 1
 	Disconnected = 2
 )
 
 const (
-	awaitRelTimeout int64  = 20
-	retryInterval	int64 = 20
+	awaitRelTimeout int64 = 20
+	retryInterval   int64 = 20
 )
 
 var (
@@ -43,88 +44,86 @@ var (
 )
 
 type client struct {
-	typ			int
-	mu 			sync.Mutex
-	broker 		*Broker
-	conn 		net.Conn
-	info 		info
-	route 		route
-	status 		int
-	ctx 		context.Context
-	cancelFunc 	context.CancelFunc
-	session 	*sessions.Session
-	subMap 		map[string]*subscription
-	subMapMu 	sync.RWMutex
-	topicsMgr	*topics.Manager
-	subs 		[]interface{}
-	qoss 		[]buye
-	rmsgs		[]*packets.PublishPacket
-	routeSubMap map[string]uint64
-	routeSubMapMu	sync.Mutex
-	awaitingRel   map[uint16]int64
+	typ            int
+	mu             sync.Mutex
+	broker         *Broker
+	conn           net.Conn
+	info           info
+	route          route
+	status         int
+	ctx            context.Context
+	cancelFunc     context.CancelFunc
+	session        *sessions.Session
+	subMap         map[string]*subscription
+	subMapMu       sync.RWMutex
+	topicsMgr      *topics.Manager
+	subs           []interface{}
+	qoss           []byte
+	rmsgs          []*packets.PublishPacket
+	routeSubMap    map[string]uint64
+	routeSubMapMu  sync.Mutex
+	awaitingRel    map[uint16]int64
 	maxAwaitingRel int
-	inflight 		map[uint16]*inflightElem
-	inflightMu 		sync.RWMutex
-	mqueue 			*queue.Queue
-	retryTimer 		*time.Timer
-	retryTimerLock  sync.Mutex
-
+	inflight       map[uint16]*inflightElem
+	inflightMu     sync.RWMutex
+	mqueue         *queue.Queue
+	retryTimer     *time.Timer
+	retryTimerLock sync.Mutex
 }
 
 type InflightStatus uint8
 
 const (
 	Publish InflightStatus = 0
-	Pubrel InflightStatus = 1
+	Pubrel  InflightStatus = 1
 )
 
 type inflightElem struct {
-	status InflightStatus
-	packet  *packets.PublishPacket
+	status    InflightStatus
+	packet    *packets.PublishPacket
 	timestamp int64
 }
 
 type subscription struct {
-	client		*client
-	topic 		string
-	qos 		byte
-	share 		bool
-	groupName 	string
+	client    *client
+	topic     string
+	qos       byte
+	share     bool
+	groupName string
 }
 
 type info struct {
-	clientID 	string
-	username 	string
-	password 	[]byte
+	clientID  string
+	username  string
+	password  []byte
 	keepalive uint16
-	willMsg 	*packets.PublishPacket
-	localIP 	string
-	remoteIP 	string
-
+	willMsg   *packets.PublishPacket
+	localIP   string
+	remoteIP  string
 }
 
 type route struct {
-	remoteID string
-	remoteUrl  string
+	remoteID  string
+	remoteUrl string
 }
 
 var (
 	DisconnectedPacket = packets.NewControlPacket(packets.Disconnect).(*packets.DisconnectPacket)
-	r					= rand.New(rand.NewSource(time.Now().UnixNano()))
+	r                  = rand.New(rand.NewSource(time.Now().UnixNano()))
 )
 
 func (c *client) init() {
 	c.status = Connected
-	c.info.localIP,_,_ = net.SplitHostPort(c.conn.LocalAddr().String())
+	c.info.localIP, _, _ = net.SplitHostPort(c.conn.LocalAddr().String())
 	remoteAddr := c.conn.RemoteAddr()
 	remoteNetwork := remoteAddr.Network()
 	c.info.remoteIP = ""
 	if remoteNetwork != "websocket" {
-		c.info.remoteIP,_,_ = net.SplitHostPort(remoteAddr.String())
+		c.info.remoteIP, _, _ = net.SplitHostPort(remoteAddr.String())
 
-	}else{
+	} else {
 		ws := c.conn.(*websocket.Conn)
-		c.info.remoteIP,_,_ = net.SplitHostPort(ws.Request().RemoteAddr)
+		c.info.remoteIP, _, _ = net.SplitHostPort(ws.Request().RemoteAddr)
 
 	}
 	c.ctx, c.cancelFunc = context.WithCancel(context.Background())
@@ -132,8 +131,8 @@ func (c *client) init() {
 	c.topicsMgr = c.broker.topicsMgr
 	c.routeSubMap = make(map[string]uint64)
 	c.awaitingRel = make(map[uint16]int64)
-	c.inflight 	= make(map[uint16]*inflightElem)
-	c.mqueue	= queue.New()
+	c.inflight = make(map[uint16]*inflightElem)
+	c.mqueue = queue.New()
 }
 
 func (c *client) readLoop() {
@@ -143,7 +142,7 @@ func (c *client) readLoop() {
 		return
 	}
 	keepAlive := time.Second * time.Duration(c.info.keepalive)
-	timeOut := keepAlive + (keepAlive/2)
+	timeOut := keepAlive + (keepAlive / 2)
 	for {
 		select {
 		case <-c.ctx.Done():
@@ -154,33 +153,33 @@ func (c *client) readLoop() {
 					log.Error("set read timeout error: ", zap.Error(err), zap.String("ClientID", c.info.clientID))
 					msg := &Message{
 						client: c,
-						packet:DisconnectedPacket,
+						packet: DisconnectedPacket,
 					}
-					b.SubmitWork(c.info.clientID,msg)
+					b.SubmitWork(c.info.clientID, msg)
 					return
 				}
 			}
-			packet,err := packets.ReadPacket(nc)
+			packet, err := packets.ReadPacket(nc)
 			if err != nil {
 				log.Error("read packet error: ", zap.Error(err), zap.String("ClientID", c.info.clientID))
 				msg := &Message{
 					client: c,
 					packet: DisconnectedPacket,
 				}
-				b.SubmitWork(c.info.clientID,msg)
+				b.SubmitWork(c.info.clientID, msg)
 				return
 			}
 
-			if _,isDisconnect := packet.(*packets.DisconnectPacket); isDisconnect{
+			if _, isDisconnect := packet.(*packets.DisconnectPacket); isDisconnect {
 				c.info.willMsg = nil
 				c.cancelFunc()
 			}
 
 			msg := &Message{
 				client: c,
-				packet:packet,
+				packet: packet,
 			}
-			b.SubmitWork(c.info.clientID,msg)
+			b.SubmitWork(c.info.clientID, msg)
 		}
 	}
 }
@@ -209,7 +208,6 @@ func extractPacketFields(msgPacket packets.ControlPacket) []string {
 
 	return fields
 }
-
 
 // validatePacketFields function checks if any of control packets fields has ill-formed
 // UTF-8 string
@@ -243,7 +241,6 @@ func validatePacketFields(msgPacket packets.ControlPacket) (validFields bool) {
 	return
 }
 
-
 func ProcessMessage(msg *Message) {
 	c := msg.client
 	ca := msg.packet
@@ -272,14 +269,13 @@ func ProcessMessage(msg *Message) {
 		packet := ca.(*packets.PubackPacket)
 		c.inflightMu.Lock()
 		if _, found := c.inflight[packet.MessageID]; found {
-		delete(c.inflight, packet.MessageID)
+			delete(c.inflight, packet.MessageID)
 		} else {
-		log.Error("Duplicated PUBACK PacketId", zap.Uint16("MessageID", packet.MessageID))
+			log.Error("Duplicated PUBACK PacketId", zap.Uint16("MessageID", packet.MessageID))
 		}
 		c.inflightMu.Unlock()
 	}
 }
-
 
 func (c *client) ProcessPublish(packet *packets.PublishPacket) {
 	switch c.typ {

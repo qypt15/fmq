@@ -2,7 +2,7 @@ package acl
 
 import "strings"
 
-func checkTopicAuth(ACLInfo *ACLConfig, action, ip ,username, clientid, topic string) bool {
+func checkTopicAuth(ACLInfo *ACLConfig, action, ip, username, clientid, topic string) bool {
 	for _, info := range ACLInfo.Info {
 		ctyp := info.Typ
 		switch ctyp {
@@ -23,19 +23,19 @@ func checkTopicAuth(ACLInfo *ACLConfig, action, ip ,username, clientid, topic st
 	return false
 }
 
-func (a *AuthInfo) checkWithClientID(action, clientid,topic string) (bool,bool) {
+func (a *AuthInfo) checkWithClientID(action, clientid, topic string) (bool, bool) {
 	auth := false
 	match := false
 	if a.Val == "*" || a.Val == clientid {
-		for _,tp := range a.Topics {
-			des := strings.Replace(tp,"%c",clientid,-1)
+		for _, tp := range a.Topics {
+			des := strings.Replace(tp, "%c", clientid, -1)
 			if action == PUB {
-				if pubTopicMatch(topic,des){
+				if pubTopicMatch(topic, des) {
 					match = true
 					auth = a.checkAuth(PUB)
 				}
 			} else if action == SUB {
-				if subTopicMatch(topic,des){
+				if subTopicMatch(topic, des) {
 					match = true
 					auth = a.checkAuth(SUB)
 				}
@@ -46,10 +46,10 @@ func (a *AuthInfo) checkWithClientID(action, clientid,topic string) (bool,bool) 
 }
 
 func pubTopicMatch(pub, des string) bool {
-	dest,_ := SubscribeTopicSpilt(des)
-	topic,_ := PublishTopicSpilt(pub)
-	for i,t := range dest {
-		if i> len(topic)-1 {
+	dest, _ := SubscribeTopicSpilt(des)
+	topic, _ := PublishTopicSpilt(pub)
+	for i, t := range dest {
+		if i > len(topic)-1 {
 			return false
 		}
 		if t == "#" {

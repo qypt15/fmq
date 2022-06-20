@@ -27,20 +27,20 @@ var (
 )
 
 type TopicsProvider interface {
-	Subscribe(topic []byte,qos byte,subscriber interface{}) (byte,error)
-	Unsubscribe(topic []byte,subscriber interface{}) error
-	Subscribers(topic []byte,qos byte,subs *[]interface{},qoss *[]byte) error
+	Subscribe(topic []byte, qos byte, subscriber interface{}) (byte, error)
+	Unsubscribe(topic []byte, subscriber interface{}) error
+	Subscribers(topic []byte, qos byte, subs *[]interface{}, qoss *[]byte) error
 	Retain(msg *packets.PublishPacket) error
-	Retained(topic []byte,msgs *[]*packets.PublishPacket) error
+	Retained(topic []byte, msgs *[]*packets.PublishPacket) error
 	Close() error
 }
 
-func Register(name string,provider TopicsProvider) {
+func Register(name string, provider TopicsProvider) {
 	if provider == nil {
 		panic("topics: Register provide is nil")
 	}
 
-	if _,dup := providers[name]; dup{
+	if _, dup := providers[name]; dup {
 		panic("topics: Register called twice for provider " + name)
 	}
 	providers[name] = provider

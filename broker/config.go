@@ -3,17 +3,16 @@ package broker
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"errors"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
-	"go.uber.org/zap"
-	"io/ioutil"
-	"os"
 	"github.com/qypt15/fmq/logger"
 	"github.com/qypt15/fmq/plugins/auth"
 	"github.com/qypt15/fmq/plugins/bridge"
-
+	"go.uber.org/zap"
+	"io/ioutil"
+	"os"
 )
 
 type Config struct {
@@ -33,14 +32,13 @@ type Config struct {
 	Plugin   Plugins   `json:"plugins"`
 }
 
-
 type Plugins struct {
 	Auth   auth.Auth
 	Bridge bridge.BridgeMQ
 }
 
 type NamedPlugins struct {
-	Auth string
+	Auth   string
 	Bridge string
 }
 
@@ -58,9 +56,8 @@ type TLSInfo struct {
 
 var DefaultConfig *Config = &Config{
 	Worker: 4096,
-	Host: 	"0.0.0.0",
-	Port:	"1883",
-
+	Host:   "0.0.0.0",
+	Port:   "1883",
 }
 
 var (
@@ -72,14 +69,13 @@ func showHelp() {
 	os.Exit(0)
 }
 
-
-func ConfigureConfig(args []string) (*Config,error) {
+func ConfigureConfig(args []string) (*Config, error) {
 	config := &Config{}
 	var (
-		help		bool
-		configFile 	string
+		help       bool
+		configFile string
 	)
-	fs := flag.NewFlagSet("hmq-broker",flag.ExitOnError)
+	fs := flag.NewFlagSet("hmq-broker", flag.ExitOnError)
 	fs.Usage = showHelp
 
 	fs.BoolVar(&help, "h", false, "Show this message.")
@@ -104,15 +100,15 @@ func ConfigureConfig(args []string) (*Config,error) {
 	fs.BoolVar(&config.Debug, "debug", false, "enable Debug logging.")
 	fs.BoolVar(&config.Debug, "d", false, "enable Debug logging.")
 
-	fs.Bool("D",true,"enable Debug loging.")
+	fs.Bool("D", true, "enable Debug loging.")
 
 	if err := fs.Parse(args); err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	if help {
 		showHelp()
-		return nil,nil
+		return nil, nil
 	}
 
 	fs.Visit(func(f *flag.Flag) {
@@ -123,10 +119,10 @@ func ConfigureConfig(args []string) (*Config,error) {
 	})
 
 	if configFile != "" {
-		temConfig,e := LoadConfig(configFile)
+		temConfig, e := LoadConfig(configFile)
 		if e != nil {
-			return nil,e
-		}else {
+			return nil, e
+		} else {
 			config = temConfig
 		}
 	}
@@ -142,22 +138,22 @@ func ConfigureConfig(args []string) (*Config,error) {
 	return config, nil
 }
 
-func LoadConfig(filename string) (*Config,error) {
-	content,err := ioutil.ReadFile(filename)
-	if err != nil{
-		return nil,err
+func LoadConfig(filename string) (*Config, error) {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
 	}
 	var config Config
-	err = json.Unmarshal(content,&config)
+	err = json.Unmarshal(content, &config)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	return &config, nil
 }
 
 func (p *Plugins) UnmarshalJSON(b []byte) error {
 	var named NamedPlugins
-	err := json.Unmarshal(b,&named)
+	err := json.Unmarshal(b, &named)
 	if err != nil {
 		return err
 	}
@@ -197,8 +193,8 @@ func (config *Config) check() error {
 	return nil
 }
 
-func NewTLSConfig(tlsInfo TLSInfo) (*tls.Config,error) {
-	cert,err := tls.LoadX509KeyPair(tlsInfo.CertFile,tlsInfo.KeyFile)
+func NewTLSConfig(tlsInfo TLSInfo) (*tls.Config, error) {
+	cert, err := tls.LoadX509KeyPair(tlsInfo.CertFile, tlsInfo.KeyFile)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing X509 certificate/key pair: %v", zap.Error(err))
 	}
@@ -206,9 +202,9 @@ func NewTLSConfig(tlsInfo TLSInfo) (*tls.Config,error) {
 	if err != nil {
 		return nil, fmt.Errorf("error parsing certificate: %v", zap.Error(err))
 	}
-	config := tls.Config {
+	config := tls.Config{
 		Certificates: []tls.Certificate{cert},
-		MinVersion:  tls.VersionTLS12,
+		MinVersion:   tls.VersionTLS12,
 	}
 	if tlsInfo.Verify {
 		config.ClientAuth = tls.RequireAndVerifyClientCert

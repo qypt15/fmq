@@ -7,18 +7,16 @@ import (
 	"net"
 )
 
-
 type client struct {
-	status   int
-	conn 		net.Conn
-	localIP 	string
+	status  int
+	conn    net.Conn
+	localIP string
 }
 
 func (c *client) tt() {
 	c.status = 11
-	c.localIP,_,_ = net.SplitHostPort(c.conn.LocalAddr().String())
+	c.localIP, _, _ = net.SplitHostPort(c.conn.LocalAddr().String())
 }
-
 
 func main() {
 
@@ -29,6 +27,5 @@ func main() {
 	fmt.Println(config)
 	tt := net.Conn.LocalAddr
 	fmt.Println(tt)
-
 
 }
