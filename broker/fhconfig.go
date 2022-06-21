@@ -17,7 +17,7 @@ type FhConfig struct {
 	Plugin   Plugins   `json:"plugins"`
 }
 
-func Test(args []string) (*FhConfig,error) {
+func Test(args []string) (*FhConfig, error) {
 	config := &FhConfig{}
-	return config ,nil
+	return config, nil
 }

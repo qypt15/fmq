@@ -11,12 +11,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
 )
 
 type Config struct {
-	AuthURL string `json:"auth"`
-	ACLURL string  `json:"acl"`
+	AuthURL  string `json:"auth"`
+	ACLURL   string `json:"acl"`
 	SuperURL string `json:"super"`
 }
 
@@ -25,9 +24,9 @@ type authHTTP struct {
 }
 
 var (
-	config  Config
-	log				= logger.Get().Named("authhttp")
-	httpClient      *http.Client
+	config     Config
+	log        = logger.Get().Named("authhttp")
+	httpClient *http.Client
 )
 
 func Init() *authHTTP {
@@ -53,7 +52,6 @@ func Init() *authHTTP {
 	}
 	return &authHTTP{client: httpClient}
 }
-
 
 // CheckConnect check mqtt connect
 func (a *authHTTP) CheckConnect(clientID, username, password string) bool {

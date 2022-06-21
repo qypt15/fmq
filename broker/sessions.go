@@ -5,7 +5,7 @@ import "github.com/eclipse/paho.mqtt.golang/packets"
 func (b *Broker) getSession(cli *client, req *packets.ConnectPacket, resp *packets.ConnackPacket) error {
 
 	var err error
-	if len(req.ClientIdentifier) == 0{
+	if len(req.ClientIdentifier) == 0 {
 		req.CleanSession = true
 
 	}

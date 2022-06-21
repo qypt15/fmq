@@ -2,8 +2,6 @@ package bridge
 
 import "github.com/qypt15/fmq/logger"
 
-
-
 const (
 	//Connect mqtt connect
 	Connect = "connect"
@@ -42,7 +40,6 @@ type BridgeMQ interface {
 	// Publish return true to cost the message
 	Publish(e *Elements) (bool, error)
 }
-
 
 func NewBridgeMQ(name string) BridgeMQ {
 
