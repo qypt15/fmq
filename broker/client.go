@@ -7,6 +7,7 @@ import (
 	"github.com/eclipse/paho.mqtt.golang/packets"
 	"github.com/qypt15/fmq/broker/lib/sessions"
 	"github.com/qypt15/fmq/broker/lib/topics"
+	"github.com/qypt15/fmq/plugins/bridge"
 	"go.uber.org/zap"
 	"golang.org/x/net/websocket"
 	"math/rand"
@@ -290,5 +291,27 @@ func (c *client) ProcessPublish(packet *packets.PublishPacket) {
 }
 
 func (c *client) processClientPublish(packet *packets.PublishPacket) {
-	topics := packet.TopicName
+	topic := packet.TopicName
+
+	if !c.broker.CheckTopicAuth(PUB, c.info.clientID, c.info.username, c.info.remoteIP, topic) {
+		log.Error("Pub Topics Auth failed, ", zap.String("topic", topic), zap.String("ClientID", c.info.clientID))
+		return
+	}
+
+	cost := c.broker.Publish(&bridge.Elements{
+		ClientID: c.info.clientID,
+		Username: c.info.username,
+		Action: bridge.Publish,
+		Timestamp: time.Now().Unix(),
+		Payload: string(packet.Payload),
+		Topic: topic,
+	})
+	if cost{
+		return
+	}
+	switch packet.Qos {
+	case QosAtMostOnce:
+		c.ProcessPublishMessage(packet)
+	}
+
 }
