@@ -294,5 +294,9 @@ func (c *client) ProcessPublish(packet *packets.PublishPacket) {
 }
 
 func (c *client) processClientPublish(packet *packets.PublishPacket) {
-	topics := packet.TopicName
+	topic := packet.TopicName
+	if !c.broker.CheckTopicAuth(PUB,c.info.clientID,c.info.username,c.info.remoteIP,topic) {
+		log.Error("Pub Topics Auth failed, ", zap.String("topic", topic), zap.String("ClientID", c.info.clientID))
+		return
+	}
 }
